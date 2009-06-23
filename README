@@ -1,0 +1,100 @@
+NAME
+    "Socket::Packet" - interface to Linux's "PF_PACKET" socket family
+
+SYNOPSIS
+     use Socket qw( SOCK_DGRAM );
+     use Socket::Packet qw(
+        PF_PACKET
+        ETH_P_ALL
+        pack_sockaddr_ll unpack_sockaddr_ll
+     );
+     
+ socket( my $sock, PF_PACKET, SOCK_DGRAM, 0 )
+        or die "Cannot socket() - $!\n";
+     
+ bind( $sock, pack_sockaddr_ll( ETH_P_ALL, 0, 0, 0, "" ) )
+        or die "Cannot bind() - $!\n";
+     
+ while( my $addr = recv( $sock, my $packet, 8192, 0 ) ) {
+        my ( $proto, $ifindex, $hatype, $pkttype, $addr )
+           = unpack_sockaddr_ll( $addr );
+
+        ...
+     }
+
+DESCRIPTION
+    To quote packet(7):
+
+     Packet sockets are used to receive or send raw packets at the device driver
+     (OSI Layer 2) level. They allow the user to implement protocol modules in
+     user space on top of the physical layer.
+
+    Sockets in the "PF_PACKET" family get direct link-level access to the
+    underlying hardware (i.e. Ethernet or similar). They are usually used to
+    implement packet capturing, or sending of specially-constructed packets
+    or to implement protocols the underlying kernel does not recognise.
+
+    The use of "PF_PACKET" sockets is usually restricted to privileged users
+    only.
+
+CONSTANTS
+    The following constants are exported
+
+    PF_PACKET
+            The packet family (for "socket()" calls)
+
+    AF_PACKET
+            The address family
+
+    PACKET_HOST
+            This packet is inbound unicast for this host.
+
+    PACKET_BROADCAST
+            This packet is inbound broadcast.
+
+    PACKET_MULTICAST
+            This packet is inbound multicast.
+
+    PACKET_OTHERHOST
+            This packet is inbound unicast for another host.
+
+    PACKET_OUTGOING
+            This packet is outbound.
+
+    ETH_P_ALL
+            Pseudo-protocol number to capture all protocols.
+
+FUNCTIONS
+    The following pair of functions operate on "AF_PACKET" address
+    structures. The meanings of the parameters are:
+
+    protocol
+            An ethertype protocol number. When using an address with
+            "bind()", the constant "ETH_P_ALL" can be used instead, to
+            capture any protocol. The "pack_sockaddr_ll()" and
+            "unpack_sockaddr_ll()" functions byte-swap this value to or from
+            network endian order.
+
+    ifindex The index number of the interface on which the packet was sent
+            or received. When using an address with "bind()", the value 0
+            can be used instead, to watch all interfaces.
+
+    hatype  The hardware ARP type of hardware address.
+
+    pkttype The type of the packet; indicates if it was sent or received.
+            Will be one of the "PACKET_*" values.
+
+    addr    The underlying hardware address, in the type given by "hatype".
+
+  $a = pack_sockaddr_ll( $protocol, $ifindex, $hatype, $pkttype, $addr )
+    Returns a "sockaddr_ll" structure with the fields packed into it.
+
+  ( $protocol, $ifindex, $hatype, $pkttype, $addr ) = unpack_sockaddr_ll( $a )
+    Takes a "sockaddr_ll" structure and returns the unpacked fields from it.
+
+SEE ALSO
+    *   packet(7) - packet, AF_PACKET - packet interface on device level
+
+AUTHOR
+    Paul Evans <leonerd@leonerd.org.uk>
+

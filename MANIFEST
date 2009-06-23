@@ -1,0 +1,12 @@
+Build.PL
+examples/capture.pl
+lib/Socket/Packet.pm
+lib/Socket/Packet.xs
+MANIFEST			This list of files
+t/00use.t
+t/01constant.t
+t/10sockaddr.t
+Makefile.PL
+README
+LICENSE
+META.yml
