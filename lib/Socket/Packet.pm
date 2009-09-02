@@ -13,11 +13,13 @@ use Carp;
 use base qw( Exporter );
 use base qw( DynaLoader );
 
-our $VERSION = "0.01";
+our $VERSION = '0.02';
 
 our @EXPORT_OK = qw(
    pack_sockaddr_ll
    unpack_sockaddr_ll
+   siocgstamp
+   siocgstampns
 );
 
 __PACKAGE__->DynaLoader::bootstrap( $VERSION );
@@ -28,14 +30,14 @@ C<Socket::Packet> - interface to Linux's C<PF_PACKET> socket family
 
 =head1 SYNOPSIS
 
- use Socket qw( SOCK_DGRAM );
+ use Socket qw( SOCK_RAW );
  use Socket::Packet qw(
     PF_PACKET
     ETH_P_ALL
     pack_sockaddr_ll unpack_sockaddr_ll
  );
  
- socket( my $sock, PF_PACKET, SOCK_DGRAM, 0 )
+ socket( my $sock, PF_PACKET, SOCK_RAW, 0 )
     or die "Cannot socket() - $!\n";
  
  bind( $sock, pack_sockaddr_ll( ETH_P_ALL, 0, 0, 0, "" ) )
@@ -63,6 +65,10 @@ or to implement protocols the underlying kernel does not recognise.
 
 The use of C<PF_PACKET> sockets is usually restricted to privileged users
 only.
+
+This module also provides functions for accessing the last received packet
+timestamp stored in a C<PF_PACKET> socket, as such may be useful for packet
+capture applications.
 
 =cut
 
@@ -108,7 +114,7 @@ Pseudo-protocol number to capture all protocols.
 
 =cut
 
-=head1 FUNCTIONS
+=head1 ADDRESS FUNCTIONS
 
 The following pair of functions operate on C<AF_PACKET> address structures.
 The meanings of the parameters are:
@@ -152,6 +158,26 @@ Returns a C<sockaddr_ll> structure with the fields packed into it.
 =head2 ( $protocol, $ifindex, $hatype, $pkttype, $addr ) = unpack_sockaddr_ll( $a )
 
 Takes a C<sockaddr_ll> structure and returns the unpacked fields from it.
+
+=head1 TIMESTAMP FUNCTIONS
+
+=head2 $time = siocgstamp( $sock )
+
+=head2 ( $sec, $usec ) = siocgstamp( $sock )
+
+Returns the timestamp of the last received packet on the socket (as obtained
+by the C<SIOCGSTAMP> C<ioctl>). In scalar context, returns a single
+floating-point value in UNIX epoch seconds. In list context, returns the
+number of seconds, and the number of microseconds.
+
+=head2 $time = siocgstampns( $sock )
+
+=head2 ( $sec, $nsec ) = siocgstampns( $sock )
+
+Returns the nanosecond-precise timestamp of the last received packet on the
+socket (as obtained by the C<SIOCGSTAMPNS> C<ioctl>). In scalar context,
+returns a single floating-point value in UNIX epoch seconds. In list context,
+returns the number of seconds, and the number of nanoseconds.
 
 =cut
 

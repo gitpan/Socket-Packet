@@ -3,20 +3,17 @@
 use strict;
 use warnings;
 
-use Socket qw( SOCK_DGRAM );
+use IO::Socket::Packet;
 use Socket::Packet qw(
-   PF_PACKET
-   ETH_P_ALL
-   pack_sockaddr_ll unpack_sockaddr_ll
    PACKET_OUTGOING
 );
 
-socket( my $sock, PF_PACKET, SOCK_DGRAM, 0 ) or die "Cannot socket() - $!\n";
+my $sock = IO::Socket::Packet->new( IfIndex => 0 )
+   or die "Cannot create PF_PACKET socket - $!";
 
-bind( $sock, pack_sockaddr_ll( ETH_P_ALL, 0, 0, 0, "" ) ) or die "Cannot bind() - $!\n";
-
-while( my $addr = recv( $sock, my $packet, 8192, 0 ) ) {
-   my ( $proto, $ifindex, $hatype, $pkttype, $addr ) = unpack_sockaddr_ll( $addr );
+while( my ( $proto, $ifindex, $hatype, $pkttype, $addr ) = $sock->recv_unpack( my $packet, 8192, 0 ) ) {
+   my ( $ts, $ts_usec ) = $sock->timestamp;
+   printf "[%4d/%02d/%02d %02d:%02d:%02d.%06d] ", (localtime $ts)[5]+1900, (localtime $ts)[4,3,2,1,0], $ts_usec;
 
    # Reformat nicely for printing
    $addr = join( ":", map sprintf("%02x", ord $_), split //, $addr );
@@ -30,5 +27,5 @@ while( my $addr = recv( $sock, my $packet, 8192, 0 ) ) {
 
    printf " of protocol %04x on interface %d:\n", $proto, $ifindex;
 
-   printf "  %v02x\n", $1 while $packet =~ m/(.{1,16})/g;
+   printf "  %v02x\n", $1 while $packet =~ m/(.{1,16})/sg;
 }

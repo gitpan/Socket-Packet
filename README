@@ -2,14 +2,14 @@ NAME
     "Socket::Packet" - interface to Linux's "PF_PACKET" socket family
 
 SYNOPSIS
-     use Socket qw( SOCK_DGRAM );
+     use Socket qw( SOCK_RAW );
      use Socket::Packet qw(
         PF_PACKET
         ETH_P_ALL
         pack_sockaddr_ll unpack_sockaddr_ll
      );
      
- socket( my $sock, PF_PACKET, SOCK_DGRAM, 0 )
+ socket( my $sock, PF_PACKET, SOCK_RAW, 0 )
         or die "Cannot socket() - $!\n";
      
  bind( $sock, pack_sockaddr_ll( ETH_P_ALL, 0, 0, 0, "" ) )
@@ -36,6 +36,10 @@ DESCRIPTION
 
     The use of "PF_PACKET" sockets is usually restricted to privileged users
     only.
+
+    This module also provides functions for accessing the last received
+    packet timestamp stored in a "PF_PACKET" socket, as such may be useful
+    for packet capture applications.
 
 CONSTANTS
     The following constants are exported
@@ -64,7 +68,7 @@ CONSTANTS
     ETH_P_ALL
             Pseudo-protocol number to capture all protocols.
 
-FUNCTIONS
+ADDRESS FUNCTIONS
     The following pair of functions operate on "AF_PACKET" address
     structures. The meanings of the parameters are:
 
@@ -91,6 +95,22 @@ FUNCTIONS
 
   ( $protocol, $ifindex, $hatype, $pkttype, $addr ) = unpack_sockaddr_ll( $a )
     Takes a "sockaddr_ll" structure and returns the unpacked fields from it.
+
+TIMESTAMP FUNCTIONS
+  $time = siocgstamp( $sock )
+  ( $sec, $usec ) = siocgstamp( $sock )
+    Returns the timestamp of the last received packet on the socket (as
+    obtained by the "SIOCGSTAMP" "ioctl"). In scalar context, returns a
+    single floating-point value in UNIX epoch seconds. In list context,
+    returns the number of seconds, and the number of microseconds.
+
+  $time = siocgstampns( $sock )
+  ( $sec, $nsec ) = siocgstampns( $sock )
+    Returns the nanosecond-precise timestamp of the last received packet on
+    the socket (as obtained by the "SIOCGSTAMPNS" "ioctl"). In scalar
+    context, returns a single floating-point value in UNIX epoch seconds. In
+    list context, returns the number of seconds, and the number of
+    nanoseconds.
 
 SEE ALSO
     *   packet(7) - packet, AF_PACKET - packet interface on device level

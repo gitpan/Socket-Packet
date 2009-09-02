@@ -12,8 +12,28 @@
 #include <netpacket/packet.h>
 #include <net/ethernet.h>
 
+/* Borrowed from IO/Sockatmark.xs */
+
+#ifdef PerlIO
+typedef PerlIO * InputStream;
+#else
+#define PERLIO_IS_STDIO 1
+typedef FILE * InputStream;
+#define PerlIO_fileno(f) fileno(f)
+#endif
+
+/* Lower and upper bounds of a valid struct sockaddr_ll */
+static int sll_max;
+static int sll_min;
+/* Maximum number of address bytes in a struct sockaddr_ll */
+static int sll_maxaddr;
+
 static void setup_constants(void)
 {
+  sll_max = sizeof(struct sockaddr_ll);
+  sll_maxaddr = sizeof(((struct sockaddr_ll*)NULL)->sll_addr);
+  sll_min = sll_max - sll_maxaddr;
+
   HV *stash;
   AV *export;
 
@@ -61,8 +81,8 @@ pack_sockaddr_ll(protocol, ifindex, hatype, pkttype, addr)
 
     addrbytes = SvPVbyte(addr, addrlen);
 
-    if(addrlen > 8)
-      croak("addr too long; should be no more than 8 bytes, found %d", addrlen);
+    if(addrlen > sll_maxaddr)
+      croak("addr too long; should be no more than %d bytes, found %d", sll_maxaddr, addrlen);
 
     sll.sll_family   = AF_PACKET;
     sll.sll_protocol = htons(protocol);
@@ -71,7 +91,7 @@ pack_sockaddr_ll(protocol, ifindex, hatype, pkttype, addr)
     sll.sll_pkttype  = pkttype;
 
     sll.sll_halen    = addrlen;
-    memset(&sll.sll_addr, 0, 8);
+    memset(&sll.sll_addr, 0, sll_maxaddr);
     memcpy(&sll.sll_addr, addrbytes, addrlen);
 
     EXTEND(SP, 1);
@@ -87,17 +107,16 @@ unpack_sockaddr_ll(sa)
     struct sockaddr_ll sll;
 
   PPCODE:
-    /* variable size of structure. Expect at least 12 bytes and no more than
-     * 20, because there might be any from 0 to 8 address bytes */
+    /* variable size of structure, because of variable length of addr bytes */
     sa_bytes = SvPVbyte(sa, sa_len);
-    if(sa_len < 12)
-      croak("Socket address too small; found %d bytes, expected at least 12", sa_len);
-    if(sa_len > 20)
-      croak("Socket address too big; found %d bytes, expected at most 20", sa_len);
+    if(sa_len < sll_min)
+      croak("Socket address too small; found %d bytes, expected at least %d", sa_len, sll_min);
+    if(sa_len > sll_max)
+      croak("Socket address too big; found %d bytes, expected at most %d", sa_len, sll_max);
 
     memcpy(&sll, sa_bytes, sizeof sll);
 
-    if(sa_len < 12 + sll.sll_halen)
+    if(sa_len < sll_min + sll.sll_halen)
       croak("Socket address too small; it did not provide enough bytes for sll_halen of %d", sll.sll_halen);
 
     if(sll.sll_family != AF_PACKET)
@@ -109,3 +128,63 @@ unpack_sockaddr_ll(sa)
     PUSHs(sv_2mortal(newSViv(sll.sll_hatype)));
     PUSHs(sv_2mortal(newSViv(sll.sll_pkttype)));
     PUSHs(sv_2mortal(newSVpvn((char *)sll.sll_addr, sll.sll_halen)));
+
+void
+siocgstamp(sock)
+  InputStream sock
+  PROTOTYPE: $
+
+  PREINIT:
+    int fd;
+    int result;
+    struct timeval tv;
+
+  PPCODE:
+    fd = PerlIO_fileno(sock);
+    if(ioctl(fd, SIOCGSTAMP, &tv) == -1) {
+      if(GIMME_V == G_ARRAY)
+        return;
+      else
+        XSRETURN_UNDEF;
+    }
+
+    if(GIMME_V == G_ARRAY) {
+      EXTEND(SP, 2);
+      PUSHs(sv_2mortal(newSViv(tv.tv_sec)));
+      PUSHs(sv_2mortal(newSViv(tv.tv_usec)));
+    }
+    else {
+      PUSHs(sv_2mortal(newSVnv((double)tv.tv_sec + (tv.tv_usec / 1000000.0))));
+    }
+
+void
+siocgstampns(sock)
+  InputStream sock
+  PROTOTYPE: $
+
+  PREINIT:
+    int fd;
+    int result;
+    struct timespec ts;
+
+  PPCODE:
+#ifdef SIOCGSTAMPNS
+    fd = PerlIO_fileno(sock);
+    if(ioctl(fd, SIOCGSTAMPNS, &ts) == -1) {
+      if(GIMME_V == G_ARRAY)
+        return;
+      else
+        XSRETURN_UNDEF;
+    }
+
+    if(GIMME_V == G_ARRAY) {
+      EXTEND(SP, 2);
+      PUSHs(sv_2mortal(newSViv(ts.tv_sec)));
+      PUSHs(sv_2mortal(newSViv(ts.tv_nsec)));
+    }
+    else {
+      PUSHs(sv_2mortal(newSVnv((double)ts.tv_sec + (ts.tv_nsec / 1000000000.0))));
+    }
+#else
+    croak("SIOCGSTAMPNS not implemented");
+#endif
