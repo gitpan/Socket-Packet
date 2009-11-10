@@ -1,5 +1,10 @@
 Revision history for Socket-Packet
 
+0.03    CHANGES:
+         * Wrap SIOCGIFINDEX and SIOCGIFNAME to provide name <=> index lookup
+         * Provided an ARP example to demonstrate packet sending
+         * Better 'OS unsupported' line if ExtUtils::CBuilder is missing
+
 0.02    CHANGES:
          * Wrap SIOCGSTAMP and SIOCGSTAMPNS to obtain packet receive timestamp
          * Created IO::Socket wrapping under the name IO::Socket::Packet

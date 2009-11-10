@@ -1,29 +1,29 @@
 ---
 name: Socket-Packet
-version: 0.02
+version: 0.03
 author:
   - 'Paul Evans <leonerd@leonerd.org.uk>'
 abstract: interface to Linux's C<PF_PACKET> socket family
 license: perl
 resources:
   license: http://dev.perl.org/licenses/
-configure_requires:
-  Module::Build: 0
-  Module::Build::Compat: 0
 build_requires:
   ExtUtils::CBuilder: 0
   IO::Socket::INET: 0
   Module::Build: 0
   Module::Build::Compat: 0
   Test::More: 0
+configure_requires:
+  Module::Build: 0
+  Module::Build::Compat: 0
 provides:
   IO::Socket::Packet:
     file: lib/IO/Socket/Packet.pm
-    version: 0.02
+    version: 0.03
   Socket::Packet:
     file: lib/Socket/Packet.pm
-    version: 0.02
-generated_by: Module::Build version 0.33
+    version: 0.03
+generated_by: Module::Build version 0.35
 meta-spec:
   url: http://module-build.sourceforge.net/META-spec-v1.4.html
   version: 1.4

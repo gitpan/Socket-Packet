@@ -8,14 +8,14 @@ SYNOPSIS
         ETH_P_ALL
         pack_sockaddr_ll unpack_sockaddr_ll
      );
-     
- socket( my $sock, PF_PACKET, SOCK_RAW, 0 )
+ 
+     socket( my $sock, PF_PACKET, SOCK_RAW, 0 )
         or die "Cannot socket() - $!\n";
-     
- bind( $sock, pack_sockaddr_ll( ETH_P_ALL, 0, 0, 0, "" ) )
+ 
+     bind( $sock, pack_sockaddr_ll( ETH_P_ALL, 0, 0, 0, "" ) )
         or die "Cannot bind() - $!\n";
-     
- while( my $addr = recv( $sock, my $packet, 8192, 0 ) ) {
+ 
+     while( my $addr = recv( $sock, my $packet, 8192, 0 ) ) {
         my ( $proto, $ifindex, $hatype, $pkttype, $addr )
            = unpack_sockaddr_ll( $addr );
 
@@ -112,7 +112,20 @@ TIMESTAMP FUNCTIONS
     list context, returns the number of seconds, and the number of
     nanoseconds.
 
+INTERFACE NAME FUNCTIONS
+  $ifindex = siocgifindex( $sock, $ifname )
+    Returns the "ifindex" of the interface with the given name if one
+    exists, or "undef" if not. $sock does not need to be a "PF_PACKET"
+    socket, any socket handle will do.
+
+  $ifname = siocgifname( $sock, $ifindex )
+    Returns the "ifname" of the interface at the given index if one exists,
+    or "undef" if not. $sock does not need to be a "PF_PACKET" socket, any
+    socket handle will do.
+
 SEE ALSO
+    *   IO::Socket::Packet - Object interface to "AF_PACKET" domain sockets
+
     *   packet(7) - packet, AF_PACKET - packet interface on device level
 
 AUTHOR

@@ -11,6 +11,7 @@
 #include <sys/socket.h>
 #include <netpacket/packet.h>
 #include <net/ethernet.h>
+#include <linux/if.h>
 
 /* Borrowed from IO/Sockatmark.xs */
 
@@ -187,4 +188,46 @@ siocgstampns(sock)
     }
 #else
     croak("SIOCGSTAMPNS not implemented");
+#endif
+
+void
+siocgifindex(sock, ifname)
+  InputStream sock
+  char *ifname
+  PROTOTYPE: $$
+
+  PREINIT:
+    int fd;
+    struct ifreq req;
+
+  PPCODE:
+#ifdef SIOCGIFINDEX
+    fd = PerlIO_fileno(sock);
+    strncpy(req.ifr_name, ifname, IFNAMSIZ);
+    if(ioctl(fd, SIOCGIFINDEX, &req) == -1)
+      XSRETURN_UNDEF;
+    PUSHs(sv_2mortal(newSViv(req.ifr_ifindex)));
+#else
+    croak("SIOCGIFINDEX not implemented");
+#endif
+
+void
+siocgifname(sock, ifindex)
+  InputStream sock
+  int ifindex
+  PROTOTYPE: $$
+
+  PREINIT:
+    int fd;
+    struct ifreq req;
+
+  PPCODE:
+#ifdef SIOCGIFNAME
+    fd = PerlIO_fileno(sock);
+    req.ifr_ifindex = ifindex;
+    if(ioctl(fd, SIOCGIFNAME, &req) == -1)
+      XSRETURN_UNDEF;
+    PUSHs(sv_2mortal(newSVpv(req.ifr_name, 0)));
+#else
+    croak("SIOCGIFNAME not implemented");
 #endif

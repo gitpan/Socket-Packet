@@ -13,13 +13,15 @@ use Carp;
 use base qw( Exporter );
 use base qw( DynaLoader );
 
-our $VERSION = '0.02';
+our $VERSION = '0.03';
 
 our @EXPORT_OK = qw(
    pack_sockaddr_ll
    unpack_sockaddr_ll
    siocgstamp
    siocgstampns
+   siocgifindex
+   siocgifname
 );
 
 __PACKAGE__->DynaLoader::bootstrap( $VERSION );
@@ -149,8 +151,6 @@ The underlying hardware address, in the type given by C<hatype>.
 
 =back
 
-=cut
-
 =head2 $a = pack_sockaddr_ll( $protocol, $ifindex, $hatype, $pkttype, $addr )
 
 Returns a C<sockaddr_ll> structure with the fields packed into it.
@@ -158,6 +158,8 @@ Returns a C<sockaddr_ll> structure with the fields packed into it.
 =head2 ( $protocol, $ifindex, $hatype, $pkttype, $addr ) = unpack_sockaddr_ll( $a )
 
 Takes a C<sockaddr_ll> structure and returns the unpacked fields from it.
+
+=cut
 
 =head1 TIMESTAMP FUNCTIONS
 
@@ -181,6 +183,22 @@ returns the number of seconds, and the number of nanoseconds.
 
 =cut
 
+=head1 INTERFACE NAME FUNCTIONS
+
+=head2 $ifindex = siocgifindex( $sock, $ifname )
+
+Returns the C<ifindex> of the interface with the given name if one exists, or
+C<undef> if not. C<$sock> does not need to be a C<PF_PACKET> socket, any
+socket handle will do.
+
+=head2 $ifname = siocgifname( $sock, $ifindex )
+
+Returns the C<ifname> of the interface at the given index if one exists, or
+C<undef> if not. C<$sock> does not need to be a C<PF_PACKET> socket, any
+socket handle will do.
+
+=cut
+
 # Keep perl happy; keep Britain tidy
 1;
 
@@ -189,6 +207,10 @@ __END__
 =head1 SEE ALSO
 
 =over 4
+
+=item *
+
+L<IO::Socket::Packet> - Object interface to C<AF_PACKET> domain sockets
 
 =item *
 

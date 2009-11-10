@@ -11,7 +11,7 @@ use POSIX qw( ENOENT );
 
 # Only root can create PF_PACKET sockets. Check if we can. If not, skip all
 if( socket( my $dummy, PF_PACKET, SOCK_RAW, 0 ) ) {
-   plan tests => 14;
+   plan tests => 17;
 }
 else {
    plan skip_all => "Cannot create PF_PACKET socket";
@@ -41,6 +41,8 @@ is( $errno, ENOENT, '$sock->stamp fails with ENOENT' );
 # Hopefully we've got at least one interface on this machine, "lo" if nothing
 # else. Probably its index is 1. Be prepared to cope if not though
 
+my $ifname;
+
 SKIP: {
    my $sock = IO::Socket::Packet->new( IfIndex => 1 );
 
@@ -52,4 +54,17 @@ SKIP: {
    is( $sock->ifindex,    1,         '$sock->ifindex is 1' );
    # Can't easily predict what hatype it will have, but it ought not be 0
    ok( $sock->hatype != 0,           '$sock->hatype is not 0' );
+
+   ok( defined $sock->ifname,        '$sock->ifname defined' );
+
+   $ifname = $sock->ifname;
+}
+
+SKIP: {
+   skip 2, "No usable interface name found" unless defined $ifname;
+
+   my $sock = IO::Socket::Packet->new( IfName => $ifname );
+
+   ok( defined $sock, 'IO::Socket::Packet->new( IfName => name ) yields a socket' );
+   is( $sock->ifname, $ifname, '$sock->ifname is name' );
 }

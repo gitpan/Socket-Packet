@@ -4,7 +4,7 @@ use warnings;
 use Module::Build;
 
 eval { require ExtUtils::CBuilder; 1 } or
-   die "OS unsupported";
+   die "OS unsupported - missing ExtUtils::CBuilder";
 
 # See if we can compile and run a program that prints the value of PF_PACKET
 print "Detecting if the OS can support PF_PACKET...\n";

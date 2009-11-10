@@ -25,7 +25,7 @@ while( my ( $proto, $ifindex, $hatype, $pkttype, $addr ) = $sock->recv_unpack( m
       print "Received a packet from $addr";
    }
 
-   printf " of protocol %04x on interface %d:\n", $proto, $ifindex;
+   printf " of protocol %04x on %s:\n", $proto, $sock->ifindex2name( $ifindex );
 
    printf "  %v02x\n", $1 while $packet =~ m/(.{1,16})/sg;
 }
