@@ -12,9 +12,13 @@ use POSIX qw( EINVAL ENOENT );
 # obtain a valid timestamp. But we can at least check the function exists and
 # that it has some error conditions
 
+# Pipes definitely shouldn't have last packet timestamps
+
+pipe( my $p1, my $p2 ) or die "Cannot pipe() - $!";
+
 my $stamp; my $errno;
 
-$stamp = siocgstamp( \*STDIN ); $errno = $!+0;
+$stamp = siocgstamp( $p1 ); $errno = $!+0;
 is( $stamp, undef, 'siocgstamp(STDIN) fails' );
 is( $errno, EINVAL, 'siocgstamp(STDIN) errors EINVAL' );
 

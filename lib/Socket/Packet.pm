@@ -1,7 +1,7 @@
 #  You may distribute under the terms of either the GNU General Public License
 #  or the Artistic License (the same terms as Perl itself)
 #
-#  (C) Paul Evans, 2009 -- leonerd@leonerd.org.uk
+#  (C) Paul Evans, 2009,2010 -- leonerd@leonerd.org.uk
 
 package Socket::Packet;
 
@@ -10,11 +10,9 @@ use warnings;
 
 use Carp;
 
-use base qw( Exporter );
-use base qw( DynaLoader );
+our $VERSION = '0.04';
 
-our $VERSION = '0.03';
-
+use Exporter 'import';
 our @EXPORT_OK = qw(
    pack_sockaddr_ll
    unpack_sockaddr_ll
@@ -24,7 +22,8 @@ our @EXPORT_OK = qw(
    siocgifname
 );
 
-__PACKAGE__->DynaLoader::bootstrap( $VERSION );
+require XSLoader;
+XSLoader::load( __PACKAGE__, $VERSION );
 
 =head1 NAME
 

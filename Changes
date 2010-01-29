@@ -1,5 +1,14 @@
 Revision history for Socket-Packet
 
+0.04    CHANGES:
+         * Use XSLoader instead of DynaLoader
+         * import Exporter::import instead of @ISAing it
+         * Use ExtUtils::CChecker for build checking
+
+        BUGFIXES:
+         * Run fail tests against a pipe to hopefully avoid spurious packet-
+           related side-effects on INET sockets
+
 0.03    CHANGES:
          * Wrap SIOCGIFINDEX and SIOCGIFNAME to provide name <=> index lookup
          * Provided an ARP example to demonstrate packet sending
