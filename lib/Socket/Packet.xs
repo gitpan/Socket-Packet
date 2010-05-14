@@ -249,8 +249,9 @@ recv_len(sock, buffer, maxlen, flags)
   PPCODE:
     fd = PerlIO_fileno(sock);
 
-    if (!SvOK(buffer))
-      sv_setpvs(buffer, "");
+    if(!SvOK(buffer))
+      sv_setpvn(buffer, "", 0);
+
     bufferp = SvGROW(buffer, (STRLEN)(maxlen+1));
 
     addrlen = sizeof(addr);

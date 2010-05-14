@@ -1,5 +1,12 @@
 Revision history for Socket-Packet
 
+0.06    CHANGES:
+         * Implement ->recv_unpack using ->recv_len so it yields wire packet
+           length and doesn't crash with MSG_TRUNC flag
+
+        BUGFIXES:
+         * Fix recv_len() so it works on Perl 5.8
+
 0.05    CHANGES:
          * Added recv_len() function and method
 

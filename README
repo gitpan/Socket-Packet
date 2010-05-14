@@ -1,5 +1,5 @@
 NAME
-    "Socket::Packet" - interface to Linux's "PF_PACKET" socket family
+    `Socket::Packet' - interface to Linux's `PF_PACKET' socket family
 
 SYNOPSIS
      use Socket qw( SOCK_RAW );
@@ -23,29 +23,29 @@ SYNOPSIS
      }
 
 DESCRIPTION
-    To quote packet(7):
+    To quote `packet(7)':
 
      Packet sockets are used to receive or send raw packets at the device driver
      (OSI Layer 2) level. They allow the user to implement protocol modules in
      user space on top of the physical layer.
 
-    Sockets in the "PF_PACKET" family get direct link-level access to the
+    Sockets in the `PF_PACKET' family get direct link-level access to the
     underlying hardware (i.e. Ethernet or similar). They are usually used to
     implement packet capturing, or sending of specially-constructed packets
     or to implement protocols the underlying kernel does not recognise.
 
-    The use of "PF_PACKET" sockets is usually restricted to privileged users
+    The use of `PF_PACKET' sockets is usually restricted to privileged users
     only.
 
     This module also provides functions for accessing the last received
-    packet timestamp stored in a "PF_PACKET" socket, as such may be useful
+    packet timestamp stored in a `PF_PACKET' socket, as such may be useful
     for packet capture applications.
 
 CONSTANTS
     The following constants are exported
 
     PF_PACKET
-            The packet family (for "socket()" calls)
+            The packet family (for `socket()' calls)
 
     AF_PACKET
             The address family
@@ -69,68 +69,68 @@ CONSTANTS
             Pseudo-protocol number to capture all protocols.
 
 FUNCTIONS
-    The following pair of functions operate on "AF_PACKET" address
+    The following pair of functions operate on `AF_PACKET' address
     structures. The meanings of the parameters are:
 
     protocol
             An ethertype protocol number. When using an address with
-            "bind()", the constant "ETH_P_ALL" can be used instead, to
-            capture any protocol. The "pack_sockaddr_ll()" and
-            "unpack_sockaddr_ll()" functions byte-swap this value to or from
+            `bind()', the constant `ETH_P_ALL' can be used instead, to
+            capture any protocol. The `pack_sockaddr_ll()' and
+            `unpack_sockaddr_ll()' functions byte-swap this value to or from
             network endian order.
 
     ifindex The index number of the interface on which the packet was sent
-            or received. When using an address with "bind()", the value 0
+            or received. When using an address with `bind()', the value `0'
             can be used instead, to watch all interfaces.
 
     hatype  The hardware ARP type of hardware address.
 
     pkttype The type of the packet; indicates if it was sent or received.
-            Will be one of the "PACKET_*" values.
+            Will be one of the `PACKET_*' values.
 
-    addr    The underlying hardware address, in the type given by "hatype".
+    addr    The underlying hardware address, in the type given by `hatype'.
 
   $a = pack_sockaddr_ll( $protocol, $ifindex, $hatype, $pkttype, $addr )
-    Returns a "sockaddr_ll" structure with the fields packed into it.
+    Returns a `sockaddr_ll' structure with the fields packed into it.
 
   ( $protocol, $ifindex, $hatype, $pkttype, $addr ) = unpack_sockaddr_ll( $a )
-    Takes a "sockaddr_ll" structure and returns the unpacked fields from it.
+    Takes a `sockaddr_ll' structure and returns the unpacked fields from it.
 
   $time = siocgstamp( $sock )
   ( $sec, $usec ) = siocgstamp( $sock )
     Returns the timestamp of the last received packet on the socket (as
-    obtained by the "SIOCGSTAMP" "ioctl"). In scalar context, returns a
+    obtained by the `SIOCGSTAMP' `ioctl'). In scalar context, returns a
     single floating-point value in UNIX epoch seconds. In list context,
     returns the number of seconds, and the number of microseconds.
 
   $time = siocgstampns( $sock )
   ( $sec, $nsec ) = siocgstampns( $sock )
     Returns the nanosecond-precise timestamp of the last received packet on
-    the socket (as obtained by the "SIOCGSTAMPNS" "ioctl"). In scalar
+    the socket (as obtained by the `SIOCGSTAMPNS' `ioctl'). In scalar
     context, returns a single floating-point value in UNIX epoch seconds. In
     list context, returns the number of seconds, and the number of
     nanoseconds.
 
   $ifindex = siocgifindex( $sock, $ifname )
-    Returns the "ifindex" of the interface with the given name if one
-    exists, or "undef" if not. $sock does not need to be a "PF_PACKET"
+    Returns the `ifindex' of the interface with the given name if one
+    exists, or `undef' if not. `$sock' does not need to be a `PF_PACKET'
     socket, any socket handle will do.
 
   $ifname = siocgifname( $sock, $ifindex )
-    Returns the "ifname" of the interface at the given index if one exists,
-    or "undef" if not. $sock does not need to be a "PF_PACKET" socket, any
+    Returns the `ifname' of the interface at the given index if one exists,
+    or `undef' if not. `$sock' does not need to be a `PF_PACKET' socket, any
     socket handle will do.
 
   ( $addr, $len ) = recv_len( $sock, $buffer, $maxlen, $flags )
-    Similar to Perl's "recv" builtin, except it returns the packet length as
-    an explict return value. This may be useful if $flags contains the
-    "MSG_TRUNC" flag, obtaining the true length of the packet on the wire,
+    Similar to Perl's `recv' builtin, except it returns the packet length as
+    an explict return value. This may be useful if `$flags' contains the
+    `MSG_TRUNC' flag, obtaining the true length of the packet on the wire,
     even if this is longer than the data written in the buffer.
 
 SEE ALSO
-    *   IO::Socket::Packet - Object interface to "AF_PACKET" domain sockets
+    *   IO::Socket::Packet - Object interface to `AF_PACKET' domain sockets
 
-    *   packet(7) - packet, AF_PACKET - packet interface on device level
+    *   `packet(7)' - packet, AF_PACKET - packet interface on device level
 
 AUTHOR
     Paul Evans <leonerd@leonerd.org.uk>

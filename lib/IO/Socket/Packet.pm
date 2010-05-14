@@ -9,7 +9,7 @@ use strict;
 use warnings;
 use base qw( IO::Socket );
 
-our $VERSION = '0.05';
+our $VERSION = '0.06';
 
 use Carp;
 
@@ -117,19 +117,31 @@ sub configure
 
 =cut
 
-=head2 ( $protocol, $ifindex, $hatype, $pkttype, $addr ) = $sock->recv_unpack( $buffer, $size, $flags )
+=head2 ( $addr, $len ) = $sock->recv_len( $buffer, $maxlen, $flags )
 
-This method is a combination of C<recv> and C<unpack_sockaddr_ll>. If it
+Similar to Perl's C<recv> builtin, except it returns the packet length as an
+explict return value. This may be useful if C<$flags> contains the
+C<MSG_TRUNC> flag, obtaining the true length of the packet on the wire, even
+if this is longer than the data written in the buffer.
+
+=cut
+
+# don't actually need to implement it; the imported symbol works fine
+
+=head2 ( $protocol, $ifindex, $hatype, $pkttype, $addr, $len ) = $sock->recv_unpack( $buffer, $size, $flags )
+
+This method is a combination of C<recv_len> and C<unpack_sockaddr_ll>. If it
 successfully receives a packet, it unpacks the address and returns the fields
-from it. If it fails, it returns an empty list.
+from it, and the length of the received packet. If it fails, it returns an
+empty list.
 
 =cut
 
 sub recv_unpack
 {
    my $self = shift;
-   my $addr = $self->recv( @_ ) or return;
-   return unpack_sockaddr_ll( $addr );
+   my ( $addr, $len ) = $self->recv_len( @_ ) or return;
+   return unpack_sockaddr_ll( $addr ), $len;
 }
 
 =head2 $protocol = $sock->protocol
@@ -274,17 +286,6 @@ sub ifindex2name
 
    return siocgifname( $sock, $ifindex );
 }
-
-=head2 ( $addr, $len ) = $sock->recv_len( $buffer, $maxlen, $flags )
-
-Similar to Perl's C<recv> builtin, except it returns the packet length as an
-explict return value. This may be useful if C<$flags> contains the
-C<MSG_TRUNC> flag, obtaining the true length of the packet on the wire, even
-if this is longer than the data written in the buffer.
-
-=cut
-
-# don't actually need to implement it; the imported symbol works fine
 
 # Keep perl happy; keep Britain tidy
 1;
