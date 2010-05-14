@@ -9,7 +9,7 @@ use strict;
 use warnings;
 use base qw( IO::Socket );
 
-our $VERSION = '0.04';
+our $VERSION = '0.05';
 
 use Carp;
 
@@ -20,6 +20,7 @@ use Socket::Packet qw(
    pack_sockaddr_ll unpack_sockaddr_ll
    siocgstamp siocgstampns
    siocgifindex siocgifname
+   recv_len
 );
 
 __PACKAGE__->register_domain( AF_PACKET );
@@ -273,6 +274,17 @@ sub ifindex2name
 
    return siocgifname( $sock, $ifindex );
 }
+
+=head2 ( $addr, $len ) = $sock->recv_len( $buffer, $maxlen, $flags )
+
+Similar to Perl's C<recv> builtin, except it returns the packet length as an
+explict return value. This may be useful if C<$flags> contains the
+C<MSG_TRUNC> flag, obtaining the true length of the packet on the wire, even
+if this is longer than the data written in the buffer.
+
+=cut
+
+# don't actually need to implement it; the imported symbol works fine
 
 # Keep perl happy; keep Britain tidy
 1;

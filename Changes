@@ -1,5 +1,8 @@
 Revision history for Socket-Packet
 
+0.05    CHANGES:
+         * Added recv_len() function and method
+
 0.04    CHANGES:
          * Use XSLoader instead of DynaLoader
          * import Exporter::import instead of @ISAing it

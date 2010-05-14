@@ -10,7 +10,7 @@ use warnings;
 
 use Carp;
 
-our $VERSION = '0.04';
+our $VERSION = '0.05';
 
 use Exporter 'import';
 our @EXPORT_OK = qw(
@@ -20,6 +20,7 @@ our @EXPORT_OK = qw(
    siocgstampns
    siocgifindex
    siocgifname
+   recv_len
 );
 
 require XSLoader;
@@ -115,7 +116,7 @@ Pseudo-protocol number to capture all protocols.
 
 =cut
 
-=head1 ADDRESS FUNCTIONS
+=head1 FUNCTIONS
 
 The following pair of functions operate on C<AF_PACKET> address structures.
 The meanings of the parameters are:
@@ -158,10 +159,6 @@ Returns a C<sockaddr_ll> structure with the fields packed into it.
 
 Takes a C<sockaddr_ll> structure and returns the unpacked fields from it.
 
-=cut
-
-=head1 TIMESTAMP FUNCTIONS
-
 =head2 $time = siocgstamp( $sock )
 
 =head2 ( $sec, $usec ) = siocgstamp( $sock )
@@ -180,10 +177,6 @@ socket (as obtained by the C<SIOCGSTAMPNS> C<ioctl>). In scalar context,
 returns a single floating-point value in UNIX epoch seconds. In list context,
 returns the number of seconds, and the number of nanoseconds.
 
-=cut
-
-=head1 INTERFACE NAME FUNCTIONS
-
 =head2 $ifindex = siocgifindex( $sock, $ifname )
 
 Returns the C<ifindex> of the interface with the given name if one exists, or
@@ -195,6 +188,13 @@ socket handle will do.
 Returns the C<ifname> of the interface at the given index if one exists, or
 C<undef> if not. C<$sock> does not need to be a C<PF_PACKET> socket, any
 socket handle will do.
+
+=head2 ( $addr, $len ) = recv_len( $sock, $buffer, $maxlen, $flags )
+
+Similar to Perl's C<recv> builtin, except it returns the packet length as an
+explict return value. This may be useful if C<$flags> contains the
+C<MSG_TRUNC> flag, obtaining the true length of the packet on the wire, even
+if this is longer than the data written in the buffer.
 
 =cut
 

@@ -231,3 +231,42 @@ siocgifname(sock, ifindex)
 #else
     croak("SIOCGIFNAME not implemented");
 #endif
+
+void
+recv_len(sock, buffer, maxlen, flags)
+    InputStream sock
+    SV *buffer
+    int maxlen
+    int flags
+
+  PREINIT:
+    int fd;
+    char *bufferp;
+    struct sockaddr_storage addr;
+    socklen_t addrlen;
+    int len;
+
+  PPCODE:
+    fd = PerlIO_fileno(sock);
+
+    if (!SvOK(buffer))
+      sv_setpvs(buffer, "");
+    bufferp = SvGROW(buffer, (STRLEN)(maxlen+1));
+
+    addrlen = sizeof(addr);
+
+    len = recvfrom(fd, bufferp, maxlen, flags, (struct sockaddr *)&addr, &addrlen);
+
+    if(len < 0)
+      XSRETURN_UNDEF;
+
+    if(len > maxlen)
+      SvCUR_set(buffer, maxlen);
+    else
+      SvCUR_set(buffer, len);
+
+    *SvEND(buffer) = '\0';
+    SvPOK_only(buffer);
+
+    PUSHs(sv_2mortal(newSVpv((char *)&addr, addrlen)));
+    PUSHs(sv_2mortal(newSViv(len)));

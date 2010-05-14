@@ -68,7 +68,7 @@ CONSTANTS
     ETH_P_ALL
             Pseudo-protocol number to capture all protocols.
 
-ADDRESS FUNCTIONS
+FUNCTIONS
     The following pair of functions operate on "AF_PACKET" address
     structures. The meanings of the parameters are:
 
@@ -96,7 +96,6 @@ ADDRESS FUNCTIONS
   ( $protocol, $ifindex, $hatype, $pkttype, $addr ) = unpack_sockaddr_ll( $a )
     Takes a "sockaddr_ll" structure and returns the unpacked fields from it.
 
-TIMESTAMP FUNCTIONS
   $time = siocgstamp( $sock )
   ( $sec, $usec ) = siocgstamp( $sock )
     Returns the timestamp of the last received packet on the socket (as
@@ -112,7 +111,6 @@ TIMESTAMP FUNCTIONS
     list context, returns the number of seconds, and the number of
     nanoseconds.
 
-INTERFACE NAME FUNCTIONS
   $ifindex = siocgifindex( $sock, $ifname )
     Returns the "ifindex" of the interface with the given name if one
     exists, or "undef" if not. $sock does not need to be a "PF_PACKET"
@@ -122,6 +120,12 @@ INTERFACE NAME FUNCTIONS
     Returns the "ifname" of the interface at the given index if one exists,
     or "undef" if not. $sock does not need to be a "PF_PACKET" socket, any
     socket handle will do.
+
+  ( $addr, $len ) = recv_len( $sock, $buffer, $maxlen, $flags )
+    Similar to Perl's "recv" builtin, except it returns the packet length as
+    an explict return value. This may be useful if $flags contains the
+    "MSG_TRUNC" flag, obtaining the true length of the packet on the wire,
+    even if this is longer than the data written in the buffer.
 
 SEE ALSO
     *   IO::Socket::Packet - Object interface to "AF_PACKET" domain sockets
