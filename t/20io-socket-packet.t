@@ -10,12 +10,11 @@ use Socket::Packet qw( PF_PACKET ETH_P_ALL );
 use POSIX qw( ENOENT );
 
 # Only root can create PF_PACKET sockets. Check if we can. If not, skip all
-if( socket( my $dummy, PF_PACKET, SOCK_RAW, 0 ) ) {
-   plan tests => 17;
-}
-else {
+unless( socket( my $dummy, PF_PACKET, SOCK_RAW, 0 ) ) {
    plan skip_all => "Cannot create PF_PACKET socket";
 }
+
+plan tests => 20;
 
 require IO::Socket::Packet;
 
@@ -61,10 +60,19 @@ SKIP: {
 }
 
 SKIP: {
-   skip 2, "No usable interface name found" unless defined $ifname;
+   skip "No usable interface name found", 2 unless defined $ifname;
 
    my $sock = IO::Socket::Packet->new( IfName => $ifname );
 
    ok( defined $sock, 'IO::Socket::Packet->new( IfName => name ) yields a socket' );
    is( $sock->ifname, $ifname, '$sock->ifname is name' );
 }
+
+SKIP: {
+   skip "IO::Socket::Packet->origdev is not supported on this platform", 2 unless defined &IO::Socket::Packet::origdev;
+
+   ok( $sock->origdev( 1 ), '$sock->origdev works to set' );
+   is( $sock->origdev, 1, '$sock->origdev works to retrieve' );
+}
+
+is_deeply( [ sort keys %{ $sock->statistics } ], [qw( drops packets )], '$sock->statistics' );

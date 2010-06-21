@@ -1,7 +1,16 @@
 #!/usr/bin/perl
 
 use strict;
-use Test::More tests => 3;
+use Test::More;
+
+# MSG_TRUNC started only works on 2.4.27 or 2.6.8 or newer
+my @ver = split( m/[.-]/, do { my $ver = `uname -r`; chomp $ver; $ver } );
+
+plan skip_all => "Kernel version too old for MSG_TRUNC - need at least 2.4.27 or 2.6.8" if $ver[0] < 2 or $ver[1] < 4;
+plan skip_all => "Kernel version too old for MSG_TRUNC - need at least 2.4.27" if $ver[0] == 2 and $ver[1] == 4 and $ver[2] < 27;
+plan skip_all => "Kernel version too old for MSG_TRUNC - need at least 2.6.8"  if $ver[0] == 2 and $ver[1] == 6 and $ver[2] < 8;
+
+plan tests => 3;
 
 # For now write the test with normal recv to prove it breaks
 

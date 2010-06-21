@@ -1,5 +1,13 @@
 Revision history for Socket-Packet
 
+0.07    CHANGES:
+         * Support socket options:
+            + PACKET_STATISTICS
+            + PACKET_ORIGDEV
+            + PACKET_ADD_MEMBERSHIP and PACKET_DROP_MEMBERSHIP
+            + PACKET_RX_RING and related
+         * Provide proper Perl-level access to the RX ring buffer
+
 0.06    CHANGES:
          * Implement ->recv_unpack using ->recv_len so it yields wire packet
            length and doesn't crash with MSG_TRUNC flag
