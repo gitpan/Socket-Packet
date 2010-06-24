@@ -1,7 +1,7 @@
 /*  You may distribute under the terms of either the GNU General Public License
  *  or the Artistic License (the same terms as Perl itself)
  *
- *  (C) Paul Evans, 2009 -- leonerd@leonerd.org.uk
+ *  (C) Paul Evans, 2009,2010 -- leonerd@leonerd.org.uk
  */
 
 #include "EXTERN.h"
@@ -51,17 +51,17 @@ static int sll_maxaddr;
 
 #if defined(HAVE_TPACKET) || defined(HAVE_TPACKET2)
 # define HAVE_RX_RING
-static int free_rxring_status(pTHX_ SV *, MAGIC *);
+static int free_rxring_state(pTHX_ SV *, MAGIC *);
 
 static MGVTBL vtbl = {
   NULL, /* get */
   NULL, /* set */
   NULL, /* len */
   NULL, /* clear */
-  &free_rxring_status, /* free */
+  &free_rxring_state, /* free */
 };
 
-struct packet_rxring_status
+struct packet_rxring_state
 {
   char *buffer;
   unsigned int frame_size;
@@ -69,28 +69,28 @@ struct packet_rxring_status
   unsigned int frame_idx;
 };
 
-static int free_rxring_status(pTHX_ SV *sv, MAGIC *mg)
+static int free_rxring_state(pTHX_ SV *sv, MAGIC *mg)
 {
   free(mg->mg_ptr);
   return 0;
 }
 
-static struct packet_rxring_status *get_rxring_status(SV *sv)
+static struct packet_rxring_state *get_rxring_state(SV *sv)
 {
   MAGIC *magic;
 
   for(magic = mg_find(sv, PERL_MAGIC_ext); magic; magic = magic->mg_moremagic) {
     if(magic->mg_type == PERL_MAGIC_ext && magic->mg_virtual == &vtbl) {
-      return (struct packet_rxring_status *)magic->mg_ptr;
+      return (struct packet_rxring_state *)magic->mg_ptr;
     }
   }
 
-  croak("Cannot find rxring status - call setup_rx_ring() first");
+  croak("Cannot find rxring state - call setup_rx_ring() first");
 }
 
-static void *frame_ptr(struct packet_rxring_status *status)
+static void *frame_ptr(struct packet_rxring_state *state)
 {
-  return status->buffer + (status->frame_size * status->frame_idx);
+  return state->buffer + (state->frame_size * state->frame_idx);
 }
 #endif
 
@@ -472,14 +472,14 @@ setup_rx_ring(sock, frame_size, frame_nr, block_size)
       XSRETURN_UNDEF;
 
     {
-      struct packet_rxring_status *status = malloc(sizeof *status);
+      struct packet_rxring_state *state = malloc(sizeof *state);
 
-      status->buffer     = addr;
-      status->frame_size = frame_size;
-      status->frame_nr   = frame_nr;
-      status->frame_idx  = 0;
+      state->buffer     = addr;
+      state->frame_size = frame_size;
+      state->frame_nr   = frame_nr;
+      state->frame_idx  = 0;
 
-      sv_magicext((SV*)sv_2io(ST(0)), NULL, PERL_MAGIC_ext, &vtbl, (char *)status, 0);
+      sv_magicext((SV*)sv_2io(ST(0)), NULL, PERL_MAGIC_ext, &vtbl, (char *)state, 0);
     }
 
     ST(0) = sv_2mortal(newSViv(size));
@@ -494,8 +494,8 @@ get_ring_frame_status(sock)
   PPCODE:
 #ifdef HAVE_RX_RING
     {
-      struct packet_rxring_status *status = get_rxring_status((SV*)sv_2io(ST(0)));
-      char *addr = frame_ptr(status);
+      struct packet_rxring_state *state = get_rxring_state((SV*)sv_2io(ST(0)));
+      char *addr = frame_ptr(state);
 #if defined(HAVE_TPACKET2)
       struct tpacket2_hdr *hdr = (struct tpacket2_hdr *)addr;
 #elif defined(HAVE_TPACKET)
@@ -520,8 +520,8 @@ get_ring_frame(sock, buffer, info)
   PPCODE:
 #ifdef HAVE_RX_RING
     {
-      struct packet_rxring_status *status = get_rxring_status((SV*)sv_2io(ST(0)));
-      char *addr = frame_ptr(status);
+      struct packet_rxring_state *state = get_rxring_state((SV*)sv_2io(ST(0)));
+      char *addr = frame_ptr(state);
       unsigned int len;
       unsigned int snaplen;
       int mac;
@@ -586,8 +586,8 @@ done_ring_frame(sock)
   PPCODE:
 #ifdef HAVE_RX_RING
     {
-      struct packet_rxring_status *status = get_rxring_status((SV*)sv_2io(ST(0)));
-      char *addr = frame_ptr(status);
+      struct packet_rxring_state *state = get_rxring_state((SV*)sv_2io(ST(0)));
+      char *addr = frame_ptr(state);
 #if defined(HAVE_TPACKET2)
       struct tpacket2_hdr *hdr = (struct tpacket2_hdr *)addr;
 #elif defined(HAVE_TPACKET)
@@ -595,7 +595,7 @@ done_ring_frame(sock)
 #endif
       hdr->tp_status = TP_STATUS_KERNEL;
 
-      status->frame_idx = (status->frame_idx + 1) % status->frame_nr;
+      state->frame_idx = (state->frame_idx + 1) % state->frame_nr;
     }
 
     XSRETURN(0);

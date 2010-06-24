@@ -1,5 +1,9 @@
 Revision history for Socket-Packet
 
+0.08    CHANGES:
+         * Use new ability of ExtUtils::CChecker 0.04 to look harder to find
+           header files suitable for TPACKET_V2
+
 0.07    CHANGES:
          * Support socket options:
             + PACKET_STATISTICS

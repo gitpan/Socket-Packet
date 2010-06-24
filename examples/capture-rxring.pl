@@ -18,7 +18,7 @@ unless( eval { $sock->setup_rx_ring( 2048, 128, 16384 ) } ) {
 
 while( defined $sock->wait_ring_frame( my $packet, \my %info ) ) {
    my @ts = localtime $info{tp_sec};
-   printf "[%4d/%02d/%02d %02d:%02d:%02d.%09d] ", $ts[5]+1900, @ts[4,3,2,1,0], $info{tp_nsec};
+   printf "[%4d/%02d/%02d %02d:%02d:%02d.%09d] ", $ts[5]+1900, $ts[4]+1, @ts[3,2,1,0], $info{tp_nsec};
 
    # Reformat nicely for printing
    my $addr = join( ":", map sprintf("%02x", ord $_), split //, $info{sll_addr} );

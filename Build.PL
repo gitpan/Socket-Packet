@@ -3,8 +3,10 @@ use warnings;
 
 use Module::Build;
 
-eval "use ExtUtils::CChecker 0.03; 1" or
-   die "OS unsupported - missing ExtUtils::CChecker ($@)";
+eval { require ExtUtils::CChecker; 1 } or
+   die "OS unsupported - missing ExtUtils::CChecker";
+eval { ExtUtils::CChecker->VERSION( 0.04 ) } or
+   die "OS unsupported - ExtUtils::CChecker too old; need at least 0.04";
 
 my $cc = ExtUtils::CChecker->new;
 
@@ -23,12 +25,14 @@ EOF
 # to cheat a little and try to use the kernel ones instead.
 chomp( my $uname_r = `uname -r` );
 
+my @dirs = (
+   [],
+   [ "/lib/modules/$uname_r/source/include" ],
+);
+
 $cc->find_include_dirs_for(
    diag => "no PACKET_STATISTICS",
-   dirs => [
-      [],
-      [ "/lib/modules/$uname_r/build/include" ],
-   ],
+   dirs => \@dirs,
    source => <<'EOF' );
 #include <linux/if_packet.h>
 int origdev = PACKET_STATISTICS;
@@ -38,8 +42,9 @@ int main(int argc, char *argv[]) {
 }
 EOF
 
-$cc->try_compile_run(
+$cc->try_find_include_dirs_for(
    define => "HAVE_ORIGDEV",
+   dirs => \@dirs,
    source => <<'EOF' );
 #include <linux/if_packet.h>
 int origdev = PACKET_ORIGDEV;
@@ -48,8 +53,9 @@ int main(int argc, char *argv[]) {
 }
 EOF
 
-$cc->try_compile_run(
+$cc->try_find_include_dirs_for(
    define => "HAVE_TPACKET",
+   dirs => \@dirs,
    source => <<'EOF' );
 #include <linux/if_packet.h>
 struct tpacket_hdr hdr;
@@ -58,8 +64,9 @@ int main(int argc, char *argv[]) {
 }
 EOF
 
-$cc->try_compile_run(
+$cc->try_find_include_dirs_for(
    define => "HAVE_TPACKET2",
+   dirs => \@dirs,
    source => <<'EOF' );
 #include <linux/if_packet.h>
 int pkttype = TPACKET_V2;
@@ -74,7 +81,7 @@ my $build = $cc->new_module_build(
    requires => {
    },
    configure_requires => {
-      'ExtUtils::CChecker' => '0.03',
+      'ExtUtils::CChecker' => '0.04',
       'Module::Build' => 0,
       'Module::Build::Compat' => 0,
    },

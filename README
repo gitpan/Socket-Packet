@@ -255,6 +255,8 @@ RING-BUFFER FUNCTIONS
 SEE ALSO
     *   IO::Socket::Packet - Object interface to "AF_PACKET" domain sockets
 
+    *   Linux::SocketFilter - interface to Linux's socket packet filtering
+
     *   packet(7) - packet, AF_PACKET - packet interface on device level
 
 AUTHOR

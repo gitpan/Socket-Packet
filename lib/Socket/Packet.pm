@@ -10,7 +10,7 @@ use warnings;
 
 use Carp;
 
-our $VERSION = '0.07';
+our $VERSION = '0.08';
 
 use Exporter 'import';
 our @EXPORT_OK = qw(
@@ -389,6 +389,10 @@ __END__
 =item *
 
 L<IO::Socket::Packet> - Object interface to C<AF_PACKET> domain sockets
+
+=item *
+
+L<Linux::SocketFilter> - interface to Linux's socket packet filtering
 
 =item *
 

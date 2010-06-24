@@ -1,7 +1,7 @@
 #  You may distribute under the terms of either the GNU General Public License
 #  or the Artistic License (the same terms as Perl itself)
 #
-#  (C) Paul Evans, 2009 -- leonerd@leonerd.org.uk
+#  (C) Paul Evans, 2009,2010 -- leonerd@leonerd.org.uk
 
 package IO::Socket::Packet;
 
@@ -9,7 +9,7 @@ use strict;
 use warnings;
 use base qw( IO::Socket );
 
-our $VERSION = '0.07';
+our $VERSION = '0.08';
 
 use Carp;
 
@@ -461,7 +461,9 @@ sub statistics
    return \%stats;
 }
 
-=head2 $val = $sock->origdev; $sock->origdev( $val )
+=head2 $val = $sock->origdev
+
+=head2 $sock->origdev( $val )
 
 Return or set the value of the C<PACKET_ORIGDEV> socket option.
 

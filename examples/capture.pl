@@ -14,7 +14,7 @@ my $sock = IO::Socket::Packet->new( IfIndex => 0 )
 while( my ( $proto, $ifindex, $hatype, $pkttype, $addr ) = $sock->recv_unpack( my $packet, 8192, 0 ) ) {
    my ( $ts, $ts_usec ) = $sock->timestamp;
    my @ts = localtime $ts;
-   printf "[%4d/%02d/%02d %02d:%02d:%02d.%06d] ", $ts[5]+1900, @ts[4,3,2,1,0], $ts_usec;
+   printf "[%4d/%02d/%02d %02d:%02d:%02d.%06d] ", $ts[5]+1900, $ts[4]+1, @ts[3,2,1,0], $ts_usec;
 
    # Reformat nicely for printing
    $addr = join( ":", map sprintf("%02x", ord $_), split //, $addr );
