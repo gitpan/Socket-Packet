@@ -1,7 +1,7 @@
 #  You may distribute under the terms of either the GNU General Public License
 #  or the Artistic License (the same terms as Perl itself)
 #
-#  (C) Paul Evans, 2009,2010 -- leonerd@leonerd.org.uk
+#  (C) Paul Evans, 2009-2012 -- leonerd@leonerd.org.uk
 
 package Socket::Packet;
 
@@ -10,7 +10,7 @@ use warnings;
 
 use Carp;
 
-our $VERSION = '0.08';
+our $VERSION = '0.09';
 
 use Exporter 'import';
 our @EXPORT_OK = qw(
@@ -377,11 +377,6 @@ to the next.
 
 =cut
 
-# Keep perl happy; keep Britain tidy
-1;
-
-__END__
-
 =head1 SEE ALSO
 
 =over 4
@@ -403,3 +398,7 @@ C<packet(7)> - packet, AF_PACKET - packet interface on device level
 =head1 AUTHOR
 
 Paul Evans <leonerd@leonerd.org.uk>
+
+=cut
+
+0x55AA;

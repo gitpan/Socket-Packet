@@ -1,7 +1,7 @@
 #  You may distribute under the terms of either the GNU General Public License
 #  or the Artistic License (the same terms as Perl itself)
 #
-#  (C) Paul Evans, 2009,2010 -- leonerd@leonerd.org.uk
+#  (C) Paul Evans, 2009-2012 -- leonerd@leonerd.org.uk
 
 package IO::Socket::Packet;
 
@@ -9,7 +9,7 @@ use strict;
 use warnings;
 use base qw( IO::Socket );
 
-our $VERSION = '0.08';
+our $VERSION = '0.09';
 
 use Carp;
 
@@ -572,11 +572,6 @@ sub done_ring_frame
    Socket::Packet::done_ring_frame( $self );
 }
 
-# Keep perl happy; keep Britain tidy
-1;
-
-__END__
-
 =head1 SEE ALSO
 
 =over 4
@@ -590,3 +585,7 @@ L<Socket::Packet> - interface to Linux's C<PF_PACKET> socket family
 =head1 AUTHOR
 
 Paul Evans <leonerd@leonerd.org.uk>
+
+=cut
+
+0x55AA;

@@ -79,6 +79,7 @@ EOF
 my $build = $cc->new_module_build(
    module_name => 'Socket::Packet',
    requires => {
+      'Exporter' => '5.57',
    },
    configure_requires => {
       'ExtUtils::CChecker' => '0.04',
